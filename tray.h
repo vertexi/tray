@@ -12,6 +12,7 @@ struct tray {
   const char *icon;
   char *tooltip;
   struct tray_menu *menu;
+  void (*tray_icon_left_button_handle)(void);
 };
 
 struct tray_menu {

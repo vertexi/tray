@@ -12,6 +12,8 @@ static HWND hwnd;
 static HMENU hmenu = NULL;
 static UINT wm_taskbarcreated;
 
+static void (*tray_icon_left_button_handle)(void);
+
 static LRESULT CALLBACK _tray_wnd_proc(HWND hwnd, UINT msg, WPARAM wparam,
                                        LPARAM lparam) {
   switch (msg) {
@@ -22,7 +24,14 @@ static LRESULT CALLBACK _tray_wnd_proc(HWND hwnd, UINT msg, WPARAM wparam,
     PostQuitMessage(0);
     return 0;
   case WM_TRAY_CALLBACK_MESSAGE:
-    if (lparam == WM_LBUTTONUP || lparam == WM_RBUTTONUP) {
+    if (lparam == WM_LBUTTONUP)
+    {
+      if (tray_icon_left_button_handle)
+      {
+        tray_icon_left_button_handle();
+      }
+    }
+    if (lparam == WM_RBUTTONUP) {
       POINT p;
       GetCursorPos(&p);
       SetForegroundWindow(hwnd);
@@ -135,6 +144,7 @@ int tray_loop(int blocking) {
 }
 
 void tray_update(struct tray *tray) {
+  tray_icon_left_button_handle = tray->tray_icon_left_button_handle;
   HMENU prevmenu = hmenu;
   UINT id = ID_TRAY_FIRST;
   hmenu = _tray_menu(tray->menu, &id);
