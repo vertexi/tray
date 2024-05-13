@@ -1,5 +1,6 @@
 #include <windows.h>
 #include <shellapi.h>
+#include "stdbool.h"
 #include "tray.h"
 
 #define WM_TRAY_CALLBACK_MESSAGE (WM_USER + 1)
@@ -13,6 +14,7 @@ static HMENU hmenu = NULL;
 static UINT wm_taskbarcreated;
 
 static void (*tray_icon_left_button_handle)(void);
+static bool exit = false;
 
 static LRESULT CALLBACK _tray_wnd_proc(HWND hwnd, UINT msg, WPARAM wparam,
                                        LPARAM lparam) {
@@ -135,7 +137,7 @@ int tray_loop(int blocking) {
   } else {
     PeekMessage(&msg, hwnd, 0, 0, PM_REMOVE);
   }
-  if (msg.message == WM_QUIT) {
+  if (msg.message == WM_QUIT && exit == true) {
     return -1;
   }
   TranslateMessage(&msg);
@@ -176,5 +178,6 @@ void tray_exit(void) {
   }
   PostQuitMessage(0);
   UnregisterClass(WC_TRAY_CLASS_NAME, GetModuleHandle(NULL));
+  exit = true;
 }
 
